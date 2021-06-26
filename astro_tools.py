@@ -98,7 +98,7 @@ class radio:
         hdu = First.get_images(position, image_size=size)
         hdu.writeto(outname)
 
-        return outname
+        return 
 
 
 
