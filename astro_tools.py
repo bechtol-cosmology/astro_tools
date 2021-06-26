@@ -3,6 +3,10 @@
 import numpy as np
 from scipy.stats import distributions as dist
 from astropy import units as u, cosmology as cos
+from astroquery.image_cutouts.first import First
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+from astropy.io import fits
 
 ####main functionality
 
@@ -79,6 +83,22 @@ class radio:
                 logrp = badval
         
         return logrp
+
+
+    def FIRST_cutout(position, size=2*u.arcmin, outname=None):
+        ###download FIRST cutout and write to file
+        if outname is None:
+            astring = tpos.ra.to_string(unit='hour', sep='', precision=3, pad=True)
+            astring = astring[:len(astring)-2]
+            dstring = tpos.dec.to_string(unit='deg', sep='', precision=2, pad=True)
+            dstring = dstring[:len(dstring)-3] ##removes decimal!
+        
+            outname = ('J' + astring + dstring + '_FIRST_cutout.fits')
+
+        hdu = First.get_images(position, image_size=size)
+        hdu.writeto(outname)
+
+        return outname
 
 
 
