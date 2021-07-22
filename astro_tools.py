@@ -48,41 +48,24 @@ class radio:
 
 
     def radio_luminosity(flux, z, a=-0.7, sunit=u.mJy, lunit='W/Hz',
-                         cosmology = cos.FlatLambdaCDM(H0=70, Om0=0.3),
-                         badval=-99):
+                         cosmology = cos.FlatLambdaCDM(H0=70, Om0=0.3)):
         'calculate the radio luminosity of a source based on flux, redshift, and assumed spectral index, returns log10 of value'
         
         ##convert to array(if not already)
         flux, z = np.array(flux), np.array(z)
     
-        ###calulate luminosity distance in m (value to avoid dimensions when logging)
-        dl = cosmology.luminosity_distance(z).to('m').value
-        
+        ###calulate luminosity distance in m
+        dl = cosmology.luminosity_distance(z)
+
         ###convert flux to W/Hz/m^2
-        flux = flux*sunit.to(lunit + '/m2')
-        
+        flux = (flux*sunit).to(lunit + '/m2')
+
         ##radio power
         radpower = (flux*4*np.pi*dl**2)/((1+z)**a)
-        print(type(radpower))
+        radpower = radpower.to(lunit)
     
-        ###filter bad values (flux has to be greater than 0)
-        if type(radpower)==np.ndarray:
-            radpower[flux<=0] = 1
-        else:
-            if radpower<=0:
-                radpower = 1
+        return(radpower)
     
-        ###log10 of radio_power
-        logrp = np.log10(radpower)
-    
-        ###filter bad values, outputs -99 as flag
-        if type(radpower)==np.ndarray:
-            logrp[flux==0] = badval
-        else:
-            if flux==0:
-                logrp = badval
-        
-        return logrp
 
 
     def FIRST_cutout(position, size=2*u.arcmin, outname=None):
