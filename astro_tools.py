@@ -71,9 +71,9 @@ class radio:
     def FIRST_cutout(position, size=2*u.arcmin, outname=None):
         ###download FIRST cutout and write to file
         if outname is None:
-            astring = tpos.ra.to_string(unit='hour', sep='', precision=3, pad=True)
+            astring = position.ra.to_string(unit='hour', sep='', precision=3, pad=True)
             astring = astring[:len(astring)-2]
-            dstring = tpos.dec.to_string(unit='deg', sep='', precision=2, pad=True)
+            dstring = position.dec.to_string(unit='deg', sep='', precision=2, pad=True)
             dstring = dstring[:len(dstring)-3] ##removes decimal!
         
             outname = ('J' + astring + dstring + '_FIRST_cutout.fits')
