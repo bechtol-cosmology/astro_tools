@@ -1,6 +1,6 @@
 ###useful astro functions I've written/collabed on over the years collected in one place
 
-import numpy as np
+import numpy as np, wget
 from scipy.stats import distributions as dist
 from astropy import units as u, cosmology as cos
 from astroquery.image_cutouts.first import First
@@ -10,6 +10,32 @@ from astropy.io import fits
 from astropy.table import Table
 
 ####main functionality
+
+def iau_name(ra, dec, aprec=2, dp=5, prefix=''):
+    ###truncated to dp so compatible with IAU standards
+    ra, dec = np.array(ra), np.array(dec)
+    
+    cat = SkyCoord(ra=ra, dec=dec, unit='deg')
+    
+    astring = cat.ra.to_string(sep='', unit='hour', precision=dp, pad=True)
+    dstring = cat.dec.to_string(sep='', precision=dp, pad=True, alwayssign=True)
+    
+    ###truncation index
+    tinda = aprec+7
+    tindd = tinda
+    if aprec==1:
+        tindd = tindd-1
+    if aprec<1:
+        tinda = tinda-1
+    
+    if prefix == '':
+        sname = ['J' + astring[i][:tinda] + dstring[i][:tindd] for i in range(len(astring))]
+    else:
+        sname = [prefix + ' J' + astring[i][:tinda] + dstring[i][:tindd] for i in
+                 range(len(astring))]
+    
+    return(sname)
+
 
 class radio:
     ###functions specific to radio astronomy
@@ -218,6 +244,31 @@ class PanSTARRS:
             for filename in table['filename']:
                 url.append(urlbase+filename)
         return url
+
+    def get_cutout(ra, dec, radius=1*u.arcmin, filt='r', format='fits',
+                    target_directory='.'):
+        'obtain cutout file for panstarrs'
+        ###can be expanded to deal with multiple filters, takes one for now
+        ###set target name for output file
+        name = iau_name(ra=[ra.value], dec=[dec.value])[0]
+        outfile = '_'.join([name, 'PanSTARRS', filt])
+        outfile = '.'.join([outfile, format])
+        outfile = '/'.join([target_directory, outfile])
+        
+        ###convert coords and radius to values(floats) and pixels(int)
+        ra = np.round(ra.to(u.deg).value, 6)
+        dec = np.round(dec.to(u.deg).value, 6)
+        size = int(np.ceil(radius.to(u.arcsec).value*2*4))##converts radius to diameter and scales to account for 0.25'' pixels
+        
+        ###produce url
+        file_url = PanSTARRS.geturl(ra=ra, dec=dec, size=size,
+                                    filters=filt, format=format)[0]
+        
+        ###download file
+        wget.download(url=file_url, out=outfile)
+        print('file downloaded and saved to ' + outfile)
+            
+        return
 
 
 
