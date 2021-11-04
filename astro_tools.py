@@ -246,9 +246,15 @@ class PanSTARRS:
         return url
 
     def get_cutout(ra, dec, radius=1*u.arcmin, filt='r', format='fits',
-                    target_directory='.'):
+                    target_directory='.', colourim=False, output_size=None):
         'obtain cutout file for panstarrs'
         ###can be expanded to deal with multiple filters, takes one for now
+        ###if grabbing a color png overwrite filt argument
+        if colourim == True:
+            if format not in ("jpg","png"):
+                raise ValueError("format must be jpg or png")
+            filt = 'gri'
+        
         ###set target name for output file
         name = iau_name(ra=[ra.value], dec=[dec.value])[0]
         outfile = '_'.join([name, 'PanSTARRS', filt])
@@ -262,12 +268,15 @@ class PanSTARRS:
         
         ###produce url
         file_url = PanSTARRS.geturl(ra=ra, dec=dec, size=size,
-                                    filters=filt, format=format)[0]
-        
+                                    filters=filt, output_size=output_size,
+                                    format=format, color=colourim)
+        if type(file_url) == list:
+            file_url = file_url[0]
+
         ###download file
         wget.download(url=file_url, out=outfile)
         print('file downloaded and saved to ' + outfile)
-            
+
         return
 
 
