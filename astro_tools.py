@@ -65,8 +65,7 @@ class radio:
     
         if return_err==True:
             e_1, e_2 = np.array(e_1), np.array(e_2)
-            erat = np.abs(srat)*(np.sqrt((e_1/s1)**2 + (e_2/s2)**2))
-            e_alpha = np.abs(erat/(srat*np.log(10)))
+            e_alpha = (1/(np.abs(nurat)))*np.sqrt((e_1/s1)**2 + (e_2/s2)**2)
             spidx = (alpha, e_alpha)
         else:
             spidx = alpha
@@ -94,13 +93,13 @@ class radio:
         return(radpower)
     
 
-
     def FIRST_cutout(position, size=2*u.arcmin, outname=None):
         ###download FIRST cutout and write to file
         if outname is None:
             astring = position.ra.to_string(unit='hour', sep='', precision=3, pad=True)
             astring = astring[:len(astring)-2]
-            dstring = position.dec.to_string(unit='deg', sep='', precision=2, pad=True)
+            dstring = position.dec.to_string(unit='deg', sep='', precision=2, pad=True,
+                                             alwayssign=True)
             dstring = dstring[:len(dstring)-3] ##removes decimal!
         
             outname = ('J' + astring + dstring + '_FIRST_cutout.fits')
@@ -245,7 +244,7 @@ class PanSTARRS:
                 url.append(urlbase+filename)
         return url
 
-    def get_cutout(ra, dec, radius=1*u.arcmin, filt='r', format='fits',
+    def get_cutout(ra, dec, radius=1*u.arcmin, filt='r', format='fits', outfile=None,
                     target_directory='.', colourim=False, output_size=None):
         'obtain cutout file for panstarrs'
         ###can be expanded to deal with multiple filters, takes one for now
@@ -256,10 +255,13 @@ class PanSTARRS:
             filt = 'gri'
         
         ###set target name for output file
-        name = iau_name(ra=[ra.value], dec=[dec.value])[0]
-        outfile = '_'.join([name, 'PanSTARRS', filt])
-        outfile = '.'.join([outfile, format])
-        outfile = '/'.join([target_directory, outfile])
+        if outfile is None:
+            name = iau_name(ra=[ra.value], dec=[dec.value])[0]
+            outfile = '_'.join([name, 'PanSTARRS', filt])
+            outfile = '.'.join([outfile, format])
+            outfile = '/'.join([target_directory, outfile])
+        else:
+            outfile = '/'.join([target_directory, outfile])
         
         ###convert coords and radius to values(floats) and pixels(int)
         ra = np.round(ra.to(u.deg).value, 6)
