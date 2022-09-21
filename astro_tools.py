@@ -54,7 +54,8 @@ class radio:
 
 
     def spec_idx(s1, s2, nu1, nu2, e_1=0, e_2=0, return_err=False):
-        'estimate the spectral index of a source based on two flux measurements at different frequencies -- errors are only based on quad sum of flux errors, first order estimate only'
+        'estimate the spectral index of a source based on two flux measurements at different frequencies'
+        ###error calculation based on eq 3 from A&A 630, A83 (2019)
         
         s1,s2 = np.array(s1), np.array(s2)
     
